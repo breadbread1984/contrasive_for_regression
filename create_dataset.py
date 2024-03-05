@@ -25,7 +25,7 @@ def main(unused_argv):
   for r,v in tqdm(zip(rho,vxc)):
     x = np.reshape(r[3:], (1,11,11,11))
     m = vxc > v
-    file_name = str(uuid1()) + '.npz'
+    file_name = join(FLAGS.output_dir, str(uuid1()) + '.npz')
     np.savez(file_name, rho = x, m = m)
     sample_list.append((file_name, np.sum(m.astype(np.int32))))
   sample_list = np.array(sample_list)

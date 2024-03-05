@@ -32,7 +32,7 @@ def main(unused_argv):
   np.save(join(FLAGS.output_dir, 'sample_list.npy'), sample_list)
 
 class ContrasiveDataset(object):
-  def __init__(self, dataset_dir, batch_size = 512, epoch_size = 50000):
+  def __init__(self, dataset_dir, batch_size = 512):
     super(ContrasiveDataset, self).__init__()
     self.sample_list = np.load(join(dataset_dir, 'sample_list.npy'))
     self.batch_size = batch_size

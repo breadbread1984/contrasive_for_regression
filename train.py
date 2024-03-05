@@ -51,11 +51,11 @@ def main(unused_argv):
       fj = fv[1:2] # fj.shape = (1,channel)
       fk = fv[2:] # fk.shape = (batch - 2, channel)
       if FLAGS.dist == 'euc':
-        positive = torch.sum((fi - fj) ** 2, dim = -1) # positive.shape = (batch)
-        negatives = torch.sum((fi - fk) ** 2, dim = -1) # negatives.shape = (batch - 2)
+        positive = -torch.sum((fi - fj) ** 2, dim = -1) # positive.shape = (batch)
+        negatives = -torch.sum((fi - fk) ** 2, dim = -1) # negatives.shape = (batch - 2)
       elif FLAGS.dist == 'l1':
-        positive = torch.sum(torch.abs(fi - fj), dim = -1) # positive.shape = (batch)
-        negatives = torch.sum(torch.abs(fi - fk), dim = -1) # negatives.shape = (batch - 2)
+        positive = -torch.sum(torch.abs(fi - fj), dim = -1) # positive.shape = (batch)
+        negatives = -torch.sum(torch.abs(fi - fk), dim = -1) # negatives.shape = (batch - 2)
       else:
         raise Exception('unknown distance method')
       logits = torch.cat([positive, negatives], dim = 0) # logits.shape = (batch - 1)

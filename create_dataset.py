@@ -34,9 +34,10 @@ class ContrasiveDataset(Dataset):
     samples.append(rhoj)
     # sample k
     sample_num = max(self.batch_size - 2, np.sum(mask.astype(np.int32)))
-    ks = np.random.choice(self.rho[mask], size = sample_num, replace = False)
+    subset = self.rho[mask]
+    ks = np.random.choice(np.arange(subset.shape[0]), size = sample_num, replace = False)
     for k in ks:
-      rhok = np.reshape(k[3:],(1,11,11,11))
+      rhok = np.reshape(subset[k,3:],(1,11,11,11))
       samples.append(rhok)
     samples = torch.from_numpy(np.stack(samples, axis = 0))
     return samples

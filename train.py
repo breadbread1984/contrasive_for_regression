@@ -29,7 +29,7 @@ def main(unused_argv):
   model = PredictorSmall()
   model.to(device(FLAGS.device))
   ce = CrossEntropyLoss()
-  optimizer = Adam(model.parameters(), l = FLAGS.lr)
+  optimizer = Adam(model.parameters(), lr = FLAGS.lr)
   scheduler = CosineAnnealingWarmRestarts(optimizer, T_0 = 5, T_mult = 2)
   tb_writer = SummaryWriter(log_dir = join(FLAGS.ckpt, 'summaries'))
   start_epoch = 0

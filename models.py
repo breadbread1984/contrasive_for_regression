@@ -61,21 +61,11 @@ class MLPMixer(nn.Module):
     results = torch.mean(results, dim = 1) # results.shape = (batch, channel)
     return results
 
-class Predictor(nn.Module):
-  def __init__(self, **kwargs):
-    super(Predictor, self).__init__()
-    self.predictor = MLPMixer(**kwargs)
-    self.dense1 = nn.Linear(kwargs.get('hidden_dim'), 1)
-  def forward(self, inputs):
-    results = self.predictor(inputs)
-    results = self.dense1(results)
-    return results
-
 class PredictorSmall(nn.Module):
   def __init__(self):
     super(PredictorSmall, self).__init__()
     kwargs = {'hidden_dim': 256, 'num_blocks': 12, 'tokens_mlp_dim': 384, 'channels_mlp_dim': 256*4, 'drop_rate': 0.1}
-    self.predictor = Predictor(**kwargs)
+    self.predictor = MLPMixer(**kwargs)
   def forward(self, inputs):
     return self.predictor(inputs)
 
@@ -83,7 +73,7 @@ class PredictorBase(nn.Module):
   def __init__(self):
     super(PredictorBase, self).__init__()
     kwargs = {'hidden_dim': 768, 'num_blocks': 12, 'tokens_mlp_dim': 384, 'channels_mlp_dim': 3072, 'drop_rate': 0.1}
-    self.predictor = Predictor(**kwargs)
+    self.predictor = MLPMixer(**kwargs)
   def forward(self, inputs):
     return self.predictor(inputs)
 

@@ -51,7 +51,7 @@ class ContrasiveDataset(object):
   def __getitem__(self, idx):
     samples = list()
     # sample i
-    datai = np.load(join(self.dataset_dir, self.sample_list[idx]))
+    datai = np.load(self.sample_list[idx])
     rhoi = datai['rho']
     distsi = datai['dists']
     samples.append(rhoi)
@@ -61,14 +61,14 @@ class ContrasiveDataset(object):
       dist = distsi[j]
       mask = distsi > dist
       if j != idx and np.any(mask): break
-    dataj = np.load(join(self.dataset_dir, self.sample_list[j]))
+    dataj = np.load(self.sample_list[j])
     rhoj = dataj['rho']
     samples.append(rhoj)
     # sample k
     sample_num = max(self.batch_size - 2, np.sum(mask.astype(np.int32)))
     ks = np.choice(self.sample_list[mask], size = sample_num, replace = False)
     for k in ks:
-      datak = np.load(join(self.dataset_dir, k))
+      datak = np.load(k)
       rhok = datak['rho']
       samples.append(rhok)
     samples = torch.from_numpy(np.stack(samples, axis = 0))

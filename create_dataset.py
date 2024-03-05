@@ -47,7 +47,7 @@ class ContrasiveDataset(Dataset):
     self.dataset_dir = dataset_dir
     self.batch_size = batch_size
   def __len__(self):
-    return len(sample_list)
+    return len(self.sample_list)
   def __getitem__(self, idx):
     samples = list()
     # sample i

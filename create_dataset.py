@@ -15,7 +15,7 @@ def add_options():
   flags.DEFINE_string('input_dir', default = None, help = 'path to input directory')
   flags.DEFINE_string('output_dir', default = 'dataset_torch', help = 'path to output directory')
   flags.DEFINE_integer('pool_size', default = 16, help = 'size of multiprocess pool')
-  flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc', 'inn'}, help = 'distance method')
+  flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc'}, help = 'distance method')
 
 def main(unused_argv):
   if exists(FLAGS.output_dir): rmtree(FLAGS.output_dir)
@@ -26,11 +26,9 @@ def main(unused_argv):
   for r,v in tqdm(zip(rho,vxc)):
     x = np.reshape(r[3:], (1,11,11,11))
     if FLAGS.dist == 'euc':
-      dists = np.sqrt(np.sum((vxc - np.expand_dims(v, axis = 0)) ** 2, axis = -1)) # dists.shape = (sample_num,)
-    elif FLAGS.dist == 'inn':
-      vxc = vxc/np.linalg.norm(vxc, axis = -1, keepdims = True)
-      v = np.expand_dims(v, axis = 0)/np.linalg.norm(np.expand_dims(v, axis = 0), axis = -1, keepdims = True)
-      dists = np.exp(-np.sum(vxc*v, axis = -1)) # dists.shape = (sample_num,)
+      dists = np.sqrt((vxc - np.expand_dims(v, axis = 0)) ** 2) # dists.shape = (sample_num,)
+    else:
+      raise Exception('unknown distance method')
     file_name = join(FLAGS.output_dir, str(uuid1()) + '.npz')
     np.savez(file_name, rho = x, dists = dists)
     sample_list.append(file_name)

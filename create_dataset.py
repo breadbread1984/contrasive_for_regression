@@ -21,12 +21,10 @@ def main(unused_argv):
   mkdir(FLAGS.output_dir)
   rho = np.load(join(FLAGS.input_dir, 'alldata.npy'))
   vxc = np.load(join(FLAGS.input_dir, 'vxc_all.npy'))
-  v1 = np.expand_dims(vxc, axis = -1) # v1.shape = (n,1)
-  v2 = np.expand_dims(vxc, axis = 0) # v2.shape = (1,n)
-  mask = v2 > v1 # mask.shape = (n,n)
   sample_list = list()
-  for r, m in tqdm(zip(rho, mask)):
+  for r,v in tqdm(zip(rho,vxc)):
     x = np.reshape(r[3:], (1,11,11,11))
+    m = vxc > v
     file_name = str(uuid1()) + '.npz'
     np.savez(file_name, rho = x, m = m)
     sample_list.append((file_name, np.sum(m.astype(np.int32))))

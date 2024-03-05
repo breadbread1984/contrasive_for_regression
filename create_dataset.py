@@ -28,12 +28,9 @@ def main(unused_argv):
     if FLAGS.dist == 'euc':
       dists = np.sqrt(np.sum((vxc - np.expand_dims(v, axis = 0)) ** 2, axis = -1)) # dists.shape = (sample_num,)
     elif FLAGS.dist == 'inn':
-      dists = np.exp(
-        -np.sum(
-          (vxc/np.linalg.norm(vxc, axis = -1, keepdims = True)) * \
-          (np.expand_dims(v, axis = 0)/np.linalg.norm(np.expand_dims(v, axis = 0), axis = -1, keepdims = True)), 
-        axis = -1)
-      ) # dists.shape = (sample_num,)
+      vxc = vxc/np.linalg.norm(vxc, axis = -1, keepdims = True)
+      v = np.expand_dims(v, axis = 0)/np.linalg.norm(np.expand_dims(v, axis = 0), axis = -1, keepdims = True)
+      dists = np.exp(-np.sum(vxc*v, axis = -1)) # dists.shape = (sample_num,)
     file_name = join(FLAGS.output_dir, str(uuid1()) + '.npz')
     np.savez(file_name, rho = x, dists = dists)
     sample_list.append(file_name)

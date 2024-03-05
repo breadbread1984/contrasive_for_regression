@@ -41,7 +41,3 @@ class ContrasiveDataset(Dataset):
     samples = torch.from_numpy(np.stack(samples, axis = 0))
     return samples
 
-if __name__ == "__main__":
-  add_options()
-  app.run(main)
-

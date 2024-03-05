@@ -39,6 +39,6 @@ class ContrasiveDataset(Dataset):
     for k in ks:
       rhok = np.reshape(subset[k,3:],(1,11,11,11))
       samples.append(rhok)
-    samples = np.stack(samples, axis = 0)
+    samples = np.stack(samples, axis = 0).astype(np.float32)
     return samples
 

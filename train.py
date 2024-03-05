@@ -7,7 +7,7 @@ from torch import device,save, load, no_grad, any, isnan, autograd
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
-from torch.optim.data import DataLoader
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from create_dataset import ContrasiveDataset
 from models import PredictorSmall

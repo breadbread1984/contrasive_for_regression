@@ -21,7 +21,7 @@ def add_options():
   flags.DEFINE_integer('epochs', default = 600, help = 'epochs to train')
   flags.DEFINE_float('lr', default = 1e-4, help = 'learning rate')
   flags.DEFINE_enum('device', default = 'cuda', enum_values = {'cpu', 'cuda'}, help = 'device')
-  flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc', 'inn'}, help = 'distance type')
+  flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc',}, help = 'distance type')
 
 def main(unused_argv):
   autograd.set_detect_anomaly(True)
@@ -53,12 +53,8 @@ def main(unused_argv):
       if FLAGS.dist == 'euc':
         positive = torch.sum((fi - fj) ** 2, dim = -1) # positive.shape = (batch)
         negatives = torch.sum((fi - fk) ** 2, dim = -1) # negatives.shape = (batch - 2)
-      elif FLAGS.dist == 'inn':
-        fi = fi / torch.norm(fi, dim = -1, keepdim = True)
-        fj = fj / torch.norm(fj, dim = -1, keepdim = True)
-        fk = fk / torch.norm(fk, dim = -1, keepdim = True)
-        positive = torch.exp(-torch.sum(fi * fj, dim = -1)) # positive.shape = (batch)
-        negatives = torch.exp(-torch.sum(fi * fk, dim = -1)) # negatives.shape = (batch - 2)
+      else:
+        raise Exception('unknown distance method')
       logits = torch.cat([positive, negatives], dim = 0) # logits.shape = (batch - 1)
       logits = torch.unsqueeze(logits, dim = 0) # logits.shape = (1, batch - 1)
       preds = torch.softmax(logits, dim = -1) # preds.shape = (1, batch - 1)

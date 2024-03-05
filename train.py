@@ -7,6 +7,7 @@ from torch import device,save, load, no_grad, any, isnan, autograd
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
+from torch.optim.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from create_dataset import ContrasiveDataset
 from models import PredictorSmall
@@ -26,7 +27,7 @@ def add_options():
 
 def main(unused_argv):
   autograd.set_detect_anomaly(True)
-  dataset = Dataloader(ContrasiveDataset(FLAGS.dataset, batch_size = FLAGS.batch_size), batch_size = 1, shuffle = True, num_workers = FLAGS.worker)
+  dataset = DataLoader(ContrasiveDataset(FLAGS.dataset, batch_size = FLAGS.batch_size), batch_size = 1, shuffle = True, num_workers = FLAGS.worker)
   model = PredictorSmall()
   model.to(device(FLAGS.device))
   ce = CrossEntropyLoss()

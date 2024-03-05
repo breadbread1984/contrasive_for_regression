@@ -25,7 +25,7 @@ def add_options():
 
 def main(unused_argv):
   autograd.set_detect_anomaly(True)
-  dataset = ContrasiveData(FLAGS.dataset, batch_size = FLAGS.batch_size)
+  dataset = ContrasiveDataset(FLAGS.dataset, batch_size = FLAGS.batch_size)
   model = PredictorSmall()
   model.to(device(FLAGS.device))
   ce = CrossEntropyLoss()

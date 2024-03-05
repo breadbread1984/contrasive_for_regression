@@ -39,6 +39,6 @@ class ContrasiveDataset(Dataset):
     for k in ks:
       rhok = np.reshape(subset[k,3:],(1,11,11,11))
       samples.append(rhok)
-    samples = torch.from_numpy(np.stack(samples, axis = 0))
+    samples = np.stack(samples, axis = 0)
     return samples
 

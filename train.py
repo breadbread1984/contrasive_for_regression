@@ -22,10 +22,11 @@ def add_options():
   flags.DEFINE_float('lr', default = 1e-4, help = 'learning rate')
   flags.DEFINE_enum('device', default = 'cuda', enum_values = {'cpu', 'cuda'}, help = 'device')
   flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc', 'l1'}, help = 'distance type')
+  flags.DEFINE_integer('worker', default = 4 , help = 'number of worker')
 
 def main(unused_argv):
   autograd.set_detect_anomaly(True)
-  dataset = ContrasiveDataset(FLAGS.dataset, batch_size = FLAGS.batch_size)
+  dataset = Dataloader(ContrasiveDataset(FLAGS.dataset, batch_size = FLAGS.batch_size), batch_size = 1, shuffle = True, num_workers = FLAGS.worker)
   model = PredictorSmall()
   model.to(device(FLAGS.device))
   ce = CrossEntropyLoss()
@@ -45,7 +46,7 @@ def main(unused_argv):
     model.train()
     for step, rho in enumerate(dataset):
       optimizer.zero_grad()
-      rho = rho.to(device(FLAGS.device))
+      rho = rho[0].to(device(FLAGS.device))
       fv = model(rho) # fv.shape = (batch, channel)
       fi = fv[:1] # fi.shape = (1,channel)
       fj = fv[1:2] # fj.shape = (1,channel)

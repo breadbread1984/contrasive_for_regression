@@ -33,7 +33,7 @@ class ContrasiveDataset(Dataset):
     rhoj = np.reshape(self.rho[j][3:],(1,11,11,11))
     samples.append(rhoj)
     # sample k
-    sample_num = max(self.batch_size - 2, np.sum(mask.astype(np.int32)))
+    sample_num = min(self.batch_size - 2, np.sum(mask.astype(np.int32)))
     subset = self.rho[mask]
     ks = np.random.choice(np.arange(subset.shape[0]), size = sample_num, replace = False)
     for k in ks:

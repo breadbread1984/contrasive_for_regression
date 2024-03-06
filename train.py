@@ -18,7 +18,7 @@ FLAGS = flags.FLAGS
 def add_options():
   flags.DEFINE_string('dataset', default = None, help = 'path to directory containing dataset')
   flags.DEFINE_string('ckpt', default = 'ckpt', help = 'path to directory for checkpoints')
-  flags.DEFINE_integer('batch_size', default = 512, help = 'batch size')
+  flags.DEFINE_integer('batch_size', default = 256, help = 'batch size')
   flags.DEFINE_integer('save_freq', default = 1000, help = 'checkpoint save frequency')
   flags.DEFINE_integer('epochs', default = 600, help = 'epochs to train')
   flags.DEFINE_float('lr', default = 1e-4, help = 'learning rate')
@@ -63,11 +63,10 @@ def main(unused_argv):
         raise Exception('unknown distance method')
       logits = torch.cat([positive, negatives], dim = 0) # logits.shape = (batch - 1)
       logits = torch.unsqueeze(logits, dim = 0) # logits.shape = (1, batch - 1)
-      if any(isnan(preds)):
+      if any(isnan(logits)):
         print('there is nan in prediction results!')
         continue
       labels = torch.zeros((1,)).to(torch.int32).to(device(FLAGS.device))
-      print(preds.shape, labels.shape)
       loss = ce(logits, labels)
       if any(isnan(loss)):
         print('there is nan in loss!')

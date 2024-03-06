@@ -27,8 +27,7 @@ class ContrasiveDataset(Dataset):
     # sample j
     while True:
       j = np.random.randint(low = 0, high = self.rho.shape[0])
-      dist = distsi[j]
-      mask = distsi > dist
+      mask = distsi > distsi[j]
       if j != idx and np.any(mask): break
     rhoj = np.reshape(self.rho[j][3:],(1,11,11,11))
     samples.append(rhoj)

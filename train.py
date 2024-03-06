@@ -66,7 +66,7 @@ def main(unused_argv):
       if any(isnan(logits)):
         print('there is nan in prediction results!')
         continue
-      labels = torch.zeros((1,)).to(torch.int32).to(device(FLAGS.device))
+      labels = torch.zeros((1,)).to(device(FLAGS.device))
       loss = ce(logits, labels)
       if any(isnan(loss)):
         print('there is nan in loss!')

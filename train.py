@@ -63,12 +63,12 @@ def main(unused_argv):
         raise Exception('unknown distance method')
       logits = torch.cat([positive, negatives], dim = 0) # logits.shape = (batch - 1)
       logits = torch.unsqueeze(logits, dim = 0) # logits.shape = (1, batch - 1)
-      preds = torch.softmax(logits, dim = -1) # preds.shape = (1, batch - 1)
       if any(isnan(preds)):
         print('there is nan in prediction results!')
         continue
-      labels = torch.zeros((1,1)).to(torch.int32).to(device(FLAGS.device))
-      loss = ce(preds, labels)
+      labels = torch.zeros((1,)).to(torch.int32).to(device(FLAGS.device))
+      print(preds.shape, labels.shape)
+      loss = ce(logits, labels)
       if any(isnan(loss)):
         print('there is nan in loss!')
         continue

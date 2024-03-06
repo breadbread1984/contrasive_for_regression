@@ -78,15 +78,8 @@ class PredictorBase(nn.Module):
     return self.predictor(inputs)
 
 if __name__ == "__main__":
-  att = Attention()
-  inputs = torch.randn(2, 768, 10)
-  results = att(inputs)
-  print(results.shape)
-  ablock = ABlock(input_size = 9)
-  inputs = torch.randn(2, 768, 9, 9, 9)
-  results = ablock(inputs)
-  print(results.shape)
-  predictor = PredictorSmall(in_channel = 4, groups = 1)
-  inputs = torch.randn(2, 4, 9, 9, 9)
+  predictor = PredictorSmall()
+  inputs = torch.randn(2, 1, 11, 11, 11)
   results = predictor(inputs)
   print(results.shape)
+  torch.save(predictor, "model.pth")

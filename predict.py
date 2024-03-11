@@ -32,7 +32,7 @@ class Predict(object):
 def main(unused_argv):
   if exists(FLAGS.output): rmtree(FLAGS.output)
   mkdir(FLAGS.output)
-  predictor = Predictor(FLAGS.ckpt)
+  predictor = Predict(FLAGS.ckpt)
   rho = np.load(FLAGS.input)
   batch = list()
   for idx, r in enumerate(rho):

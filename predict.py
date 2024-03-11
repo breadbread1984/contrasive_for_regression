@@ -4,6 +4,7 @@ from absl import flags, app
 from os import mkdir
 from os.path import join, exists
 from shutil import rmtree
+import numpy as np
 import torch
 from torch import load, device
 from models import PredictorSmall

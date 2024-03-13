@@ -15,6 +15,7 @@ def add_options():
   flags.DEFINE_string('evalset', default = None, help = 'path to evalset npy')
   flags.DEFINE_string('trainlabel', default = None, help = 'path to train labels')
   flags.DEFINE_string('evallabel', default = None, help = 'path to eval labels')
+  flags.DEFINE_string('output', default = 'plot.png', help = 'path to output picture')
 
 def main(unused_argv):
   # 1) trainset
@@ -54,7 +55,7 @@ def main(unused_argv):
   ax2.set_ylabel('log10(extractor(rho) diff)')
   ax2.set_ylim(-5, 2)
   ax2.legend()
-  fig.savefig('plot.png')
+  fig.savefig(FLAGS.output)
   with open('plot.pkl', 'wb') as f:
     pickle.dump(fig, f)
   fig.show()

@@ -25,13 +25,7 @@ def main(unused_argv):
   # 2) evalset
   evalset = np.load(FLAGS.evalset)
   # 3) 1-nn search
-  if not exists('results.npz'):
-    D, I = index.search(evalset, 1) # D.shape = (1148800,1) I.shape = (1148800,1)
-    np.savez('results.npz', D = D, I = I)
-  else:
-    data = np.load('results.npz')
-    D = data['D']
-    I = data['I']
+  D, I = index.search(evalset, 1) # D.shape = (1148800,1) I.shape = (1148800,1)
   # 3) plot
   train_labels = np.load(FLAGS.trainlabel) # train_labels.shape = (1542160)
   eval_labels = np.load(FLAGS.evallabel) # eval_labels.shape = (1148800)

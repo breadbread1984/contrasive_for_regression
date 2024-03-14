@@ -22,3 +22,13 @@ python3 create_dataset.py --input_dir <path/to/raw/dataset> --output_dir <path/t
 python3 train.py --dataset <path/to/processed/dataset> --ckpt <path/to/checkpoint>
 ```
 
+## plot results
+
+extract features 
+
+```shell
+python3 inference.py --input <path/to/raw/trainset/npy> --output trainset.npy --ckpt <path/to/checkpoint> --batch <batch size>
+python3 inference.py --input <path/to/raw/evalset/npy> --output evalset.npy --ckpt <path/to/checkpoint> --batch <batch size>
+python3 plot.py --trainset trainset.npy --evalset evalset.npy --trainlabel <path/to/raw/trainlabel/npy> --evallabel <path/to/raw/evallabel/npy> --output <path/to/output/png>
+```
+

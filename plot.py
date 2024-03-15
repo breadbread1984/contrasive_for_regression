@@ -20,7 +20,10 @@ def add_options():
 def main(unused_argv):
   # 1) trainset
   trainset = np.load(FLAGS.trainset)
-  index = faiss.IndexFlatL2(256)
+  res = faiss.StandardGpuResources()
+  flat_config = faiss.GpuIndexFlatConfig()
+  flat_config.device = 0
+  index = faiss.GpuIndexFlatL2(res, 256, flat_config)
   index.add(trainset)
   # 2) evalset
   evalset = np.load(FLAGS.evalset)

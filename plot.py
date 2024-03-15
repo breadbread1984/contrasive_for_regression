@@ -31,7 +31,7 @@ def main(unused_argv):
   eval_labels = np.load(FLAGS.evallabel) # eval_labels.shape = (1148800)
   true_values = eval_labels
   pred_values = train_labels[I[:,0]]
-  dist_values = np.log10(D[:,0])
+  dist_values = np.arcsinh(D[:,0])
 
   fig, ax1 = plt.subplots()
   # draw vxc
@@ -45,8 +45,8 @@ def main(unused_argv):
   # draw rho difference
   ax2 = ax1.twinx()
   ax2.scatter(true_values, dist_values, c = 'g', s = 2, alpha = 0.7, label = 'extractor(rho) diff')
-  ax2.axhline(y=np.log10(3.5e-3), color = 'k', linestyle = '-', alpha = 0.2, label = 'rho diff = 3.5e-3')
-  ax2.set_ylabel('log10(extractor(rho) diff)')
+  ax2.axhline(y=np.arcsinh(3.5e-3), color = 'k', linestyle = '-', alpha = 0.2, label = 'rho diff = 3.5e-3')
+  ax2.set_ylabel('arcsinh(extractor(rho) diff)')
   ax2.set_ylim(-5, 2)
   ax2.legend()
   fig.savefig(FLAGS.output)

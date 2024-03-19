@@ -15,6 +15,7 @@ def add_options():
   flags.DEFINE_string('evalset', default = None, help = 'path to evalset npy')
   flags.DEFINE_string('trainlabel', default = None, help = 'path to train labels')
   flags.DEFINE_string('evallabel', default = None, help = 'path to eval labels')
+  flags.DEFINE_integer('topk', default = 1, help = 'number of top k')
   flags.DEFINE_string('output', default = 'plot.png', help = 'path to output picture')
 
 def main(unused_argv):
@@ -25,22 +26,37 @@ def main(unused_argv):
   flat_config.device = 0
   index = faiss.GpuIndexFlatL2(res, 256, flat_config)
   index.add(trainset)
+  index_cpu = faiss.index_gpu_to_cpu(index)
+  faiss.write_index(index_cpu, 'faiss.index')
   # 2) evalset
   evalset = np.load(FLAGS.evalset)
   # 3) 1-nn search
-  D, I = index.search(evalset, 1) # D.shape = (1148800,1) I.shape = (1148800,1)
+  D, I = index.search(evalset, FLAGS.topk) # D.shape = (1148800,1) I.shape = (1148800,1)
   # 3) plot
   train_labels = np.load(FLAGS.trainlabel) # train_labels.shape = (1542160)
   eval_labels = np.load(FLAGS.evallabel) # eval_labels.shape = (1148800)
   true_values = eval_labels
-  pred_values = train_labels[I[:,0]]
+  weights = np.exp(-D) / np.sum(np.exp(-D), axis = -1, keepdims = True) # weights.shape = (query num, 5)
+  pred_values = train_labels[I] # pred_values.shape = (query_num, 5)
+  pred_values = np.sum(weights * pred_values, axis = -1) # pred_values.shape = (query_num)
   dist_values = np.log10(D[:,0])
 
   fig, ax1 = plt.subplots()
+  accurated_pred_samples = np.abs(pred_values - true_values) <= 0.01 # good_pred.shape = (query_num)
+  np.savez('results.npz', y = accurated_pred_samples, x = D[:,0])
+  accurated_pred_dists = D[accurated_pred_samples] # good_dists.shape = (query_num, 1)
+  threshold = np.max(accurated_pred_dists)
+  bad_pred_samples = D[:,0] > threshold # bad_pred.shape = (query_num)
+  good_pred_samples = np.logical_and(D[:,0] <= threshold, accurated_pred_samples) # good_pred.shape = (query_num)
+  hard_pred_samples = np.logical_and(D[:,0] <= threshold, np.logical_not(accurated_pred_samples))
   # draw vxc
-  bad_pred = np.abs(pred_values - true_values) > 0.01 # bad_pred.shape = (1148800)
-  ax1.scatter(true_values[bad_pred], pred_values[bad_pred], c = 'r', s = 2, alpha = 0.7, label = 'vxc diff > 1e-2')
-  ax1.scatter(true_values[np.logical_not(bad_pred)], pred_values[np.logical_not(bad_pred)], c = 'b', s = 2, alpha = 0.7, label = 'vxc diff < 1e-2')
+  bad_count = np.sum(bad_pred_samples.astype(np.int32))
+  good_count = np.sum(good_pred_samples.astype(np.int32))
+  hard_count = np.sum(hard_pred_samples.astype(np.int32))
+  print('bad_count: %d good_count: %d hard count: %d' % (bad_count, good_count, hard_count))
+  ax1.scatter(true_values[hard_pred_samples], pred_values[hard_pred_samples], c = 'y', s = 2, alpha = 0.7, label = 'vxc diff > 1e-2 & extractor(rho) diff <= thres')
+  ax1.scatter(true_values[bad_pred_samples], pred_values[bad_pred_samples], c = 'r', s = 2, alpha = 0.7, label = 'vxc diff > 1e-2 & extractor(rho) diff > thres')
+  ax1.scatter(true_values[good_pred_samples], pred_values[good_pred_samples], c = 'b', s = 2, alpha = 0.7, label = 'vxc diff < 1e-2 & extractor(rho) diff <= thres')
   ax1.set_xlabel('true vxc')
   ax1.set_ylabel('predict vxc')
   ax1.set_ylim(-6, 1)
@@ -48,7 +64,7 @@ def main(unused_argv):
   # draw rho difference
   ax2 = ax1.twinx()
   ax2.scatter(true_values, dist_values, c = 'g', s = 2, alpha = 0.7, label = 'extractor(rho) diff')
-  ax2.axhline(y=np.log10(3.5e-3), color = 'k', linestyle = '-', alpha = 0.2, label = 'rho diff = 3.5e-3')
+  ax2.axhline(y=np.log10(threshold), color = 'k', linestyle = '-', alpha = 0.2, label = 'rho diff = %f' % threshold)
   ax2.set_ylabel('log10(extractor(rho) diff)')
   ax2.set_ylim(-5, 2)
   ax2.legend()
@@ -60,4 +76,3 @@ def main(unused_argv):
 if __name__ == "__main__":
   add_options()
   app.run(main)
-

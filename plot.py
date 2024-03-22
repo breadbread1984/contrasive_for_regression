@@ -17,6 +17,7 @@ def add_options():
   flags.DEFINE_string('evallabel', default = None, help = 'path to eval labels')
   flags.DEFINE_integer('topk', default = 1, help = 'number of top k')
   flags.DEFINE_string('output', default = 'plot.png', help = 'path to output picture')
+  flags.DEFINE_enum('dist', default = 'l2', enum_values = {'l2', 'cos'}, help = 'distance to use')
 
 def main(unused_argv):
   # 1) trainset
@@ -24,12 +25,17 @@ def main(unused_argv):
   res = faiss.StandardGpuResources()
   flat_config = faiss.GpuIndexFlatConfig()
   flat_config.device = 0
-  index = faiss.GpuIndexFlatL2(res, 256, flat_config)
+  if FLAGS.dist == 'l2':
+    index = faiss.GpuIndexFlatL2(res, 256, flat_config)
+  elif FLAGS.dist == 'cos':
+    index = faiss.GpuIndexFlatIP(res, 256, flat_config)
+    faiss.normalize_l2(trainset)
   index.add(trainset)
   index_cpu = faiss.index_gpu_to_cpu(index)
   faiss.write_index(index_cpu, 'faiss.index')
   # 2) evalset
   evalset = np.load(FLAGS.evalset)
+  faiss.normalize_l2(evalset)
   # 3) 1-nn search
   D, I = index.search(evalset, FLAGS.topk) # D.shape = (1148800,1) I.shape = (1148800,1)
   # 3) plot

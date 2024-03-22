@@ -42,7 +42,10 @@ def main(unused_argv):
   train_labels = np.load(FLAGS.trainlabel) # train_labels.shape = (1542160)
   eval_labels = np.load(FLAGS.evallabel) # eval_labels.shape = (1148800)
   true_values = eval_labels
-  weights = np.exp(-D) / np.sum(np.exp(-D), axis = -1, keepdims = True) # weights.shape = (query num, 5)
+  if FLAGS.dist == 'l2':
+    weights = np.exp(-D) / np.sum(np.exp(-D), axis = -1, keepdims = True) # weights.shape = (query num, 5)
+  elif FLAGS.dist == 'cos':
+    weights = np.exp(D) / np.sum(np.exp(D), axis = -1, keepdims = True) # weights.shape = (query num, 5)
   pred_values = train_labels[I] # pred_values.shape = (query_num, 5)
   pred_values = np.sum(weights * pred_values, axis = -1) # pred_values.shape = (query_num)
   dist_values = np.log10(D[:,0])

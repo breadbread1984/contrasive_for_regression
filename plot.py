@@ -29,13 +29,13 @@ def main(unused_argv):
     index = faiss.GpuIndexFlatL2(res, 256, flat_config)
   elif FLAGS.dist == 'cos':
     index = faiss.GpuIndexFlatIP(res, 256, flat_config)
-    faiss.normalize_l2(trainset)
+    faiss.normalize_L2(trainset)
   index.add(trainset)
   index_cpu = faiss.index_gpu_to_cpu(index)
   faiss.write_index(index_cpu, 'faiss.index')
   # 2) evalset
   evalset = np.load(FLAGS.evalset)
-  faiss.normalize_l2(evalset)
+  faiss.normalize_L2(evalset)
   # 3) 1-nn search
   D, I = index.search(evalset, FLAGS.topk) # D.shape = (1148800,1) I.shape = (1148800,1)
   # 3) plot

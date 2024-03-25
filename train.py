@@ -57,9 +57,9 @@ def main(unused_argv):
       elif FLAGS.dist == 'l1':
         logits = -torch.sum(torch.abs(fi - fjk), dim = -1) # logits.shape = (batch - 1)
       elif FLAGS.dist == 'cos':
-        fi = fi / torch.maximum(torch.norm(fi, dim = -1, keepdim = True), torch.full(fi.shape(), 1e-32))
-        fjk = fjk / torch.maximum(torch.norm(fjk, dim = -1, keepdim = True), torch.full(fjk.shape(), 1e-32))
-        logits = np.sum(fi * fjk, dim = -1) # logits.shape = (batch - 1)
+        fi = fi / torch.maximum(torch.norm(fi, dim = -1, keepdim = True), torch.full(fi.shape, 1e-32).to(fi.device))
+        fjk = fjk / torch.maximum(torch.norm(fjk, dim = -1, keepdim = True), torch.full(fjk.shape, 1e-32).to(fjk.device))
+        logits = torch.sum(fi * fjk, dim = -1) # logits.shape = (batch - 1)
       else:
         raise Exception('unknown distance method')
       logits = torch.unsqueeze(logits, dim = 0) # logits.shape = (1, batch - 1)

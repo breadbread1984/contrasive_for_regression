@@ -21,30 +21,31 @@ def add_options():
 def main(unused_argv):
   # create index and search
   print('create index and search')
-  if not exists('results.npz'):
+  if FLAGS.size == 11:
     trainset = np.ascontiguousarray(np.load(FLAGS.trainset)[:,3:]).astype(np.float32)
-    res = faiss.StandardGpuResources()
-    flat_config = faiss.GpuIndexFlatConfig()
-    flat_config.device = 0
-    if FLAGS.dist == 'l2':
-      index = faiss.GpuIndexFlatL2(res, FLAGS.size**3, flat_config)
-    elif FLAGS.dist == 'cos':
-      index = faiss.GpuIndexFlatIP(res, FLAGS.size**3, flat_config)
-    faiss.normalize_L2(trainset)
-    index.add(trainset)
-    evalset = np.ascontiguousarray(np.load(FLAGS.evalset)[:,3:]).astype(np.float32)
-    faiss.normalize_L2(evalset)
-    D, I = index.search(evalset, 1)
-    train_labels = np.load(FLAGS.trainlabel)
-    eval_labels = np.load(FLAGS.evallabel)
-    true_values = eval_labels
-    pred_values = np.squeeze(train_labels[I], axis = -1) # pred_values.shape = (query_num, 1)
-    x = D[:,0]
-    y = np.abs(pred_values - true_values) <= 0.01
-    np.savez('results.npz', x = x, y = y)
   else:
-    data = np.load('results.npz')
-    x, y = data['x'], data['y']
+    trainset = np.ascontiguousarray(np.load(FLAGS.trainset)).astype(np.float32)
+  res = faiss.StandardGpuResources()
+  flat_config = faiss.GpuIndexFlatConfig()
+  flat_config.device = 0
+  if FLAGS.dist == 'l2':
+    index = faiss.GpuIndexFlatL2(res, FLAGS.size**3, flat_config)
+  elif FLAGS.dist == 'cos':
+    index = faiss.GpuIndexFlatIP(res, FLAGS.size**3, flat_config)
+  faiss.normalize_L2(trainset)
+  index.add(trainset)
+  if FLAGS.size == 11:
+    evalset = np.ascontiguousarray(np.load(FLAGS.evalset)[:,3:]).astype(np.float32)
+  else:
+    evalset = np.ascontiguousarray(np.load(FLAGS.evalset)).astype(np.float32)
+  faiss.normalize_L2(evalset)
+  D, I = index.search(evalset, 1)
+  train_labels = np.load(FLAGS.trainlabel)
+  eval_labels = np.load(FLAGS.evallabel)
+  true_values = eval_labels
+  pred_values = np.squeeze(train_labels[I], axis = -1) # pred_values.shape = (query_num, 1)
+  x = D[:,0]
+  y = np.abs(pred_values - true_values) <= 0.01
   # roc
   print('plotting ROC')
   values = np.unique(x)

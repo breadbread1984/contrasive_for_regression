@@ -15,6 +15,7 @@ def add_options():
   flags.DEFINE_string('evalset', default = None, help = 'path to evalset npy')
   flags.DEFINE_string('trainlabel', default = None, help = 'path to train label npy')
   flags.DEFINE_string('evallabel', default = None, help = 'path to eval label npy')
+  flags.DEFINE_integer('size', default = 11, help = 'cube size')
   flags.DEFINE_enum('dist', default = 'l2', enum_values = {'l2', 'cos'}, help = 'distance type')
 
 def main(unused_argv):
@@ -26,12 +27,13 @@ def main(unused_argv):
     flat_config = faiss.GpuIndexFlatConfig()
     flat_config.device = 0
     if FLAGS.dist == 'l2':
-      index = faiss.GpuIndexFlatL2(res, 1331, flat_config)
+      index = faiss.GpuIndexFlatL2(res, FLAGS.size**3, flat_config)
     elif FLAGS.dist == 'cos':
-      index = faiss.GpuIndexFlatIP(res, 1331, flat_config)
-    faiss.normalize_l2(trainset)
+      index = faiss.GpuIndexFlatIP(res, FLAGS.size**3, flat_config)
+    faiss.normalize_L2(trainset)
     index.add(trainset)
     evalset = np.ascontiguousarray(np.load(FLAGS.evalset)[:,3:]).astype(np.float32)
+    faiss.normalize_L2(evalset)
     D, I = index.search(evalset, 1)
     train_labels = np.load(FLAGS.trainlabel)
     eval_labels = np.load(FLAGS.evallabel)

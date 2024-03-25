@@ -23,7 +23,7 @@ def add_options():
   flags.DEFINE_integer('epochs', default = 600, help = 'epochs to train')
   flags.DEFINE_float('lr', default = 1e-4, help = 'learning rate')
   flags.DEFINE_enum('device', default = 'cuda', enum_values = {'cpu', 'cuda'}, help = 'device')
-  flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc', 'l1'}, help = 'distance type')
+  flags.DEFINE_enum('dist', default = 'euc', enum_values = {'euc', 'l1', 'cos'}, help = 'distance type')
   flags.DEFINE_integer('worker', default = 4 , help = 'number of worker')
 
 def main(unused_argv):
@@ -56,6 +56,10 @@ def main(unused_argv):
         logits = -torch.sum((fi - fjk) ** 2, dim = -1) # logits.shape = (batch - 1)
       elif FLAGS.dist == 'l1':
         logits = -torch.sum(torch.abs(fi - fjk), dim = -1) # logits.shape = (batch - 1)
+      elif FLAGS.dist == 'cos':
+        fi = fi / torch.maximum(torch.norm(fi, dim = -1, keepdim = True), torch.full(fi.shape(), 1e-32))
+        fjk = fjk / torch.maximum(torch.norm(fjk, dim = -1, keepdim = True), torch.full(fjk.shape(), 1e-32))
+        logits = np.sum(fi * fjk, dim = -1) # logits.shape = (batch - 1)
       else:
         raise Exception('unknown distance method')
       logits = torch.unsqueeze(logits, dim = 0) # logits.shape = (1, batch - 1)

@@ -48,7 +48,10 @@ def main(unused_argv):
     weights = np.exp(D) / np.sum(np.exp(D), axis = -1, keepdims = True) # weights.shape = (query num, 5)
   pred_values = train_labels[I] # pred_values.shape = (query_num, 5)
   pred_values = np.sum(weights * pred_values, axis = -1) # pred_values.shape = (query_num)
-  dist_values = np.log10(D[:,0])
+  if FLAGS.dist == 'l2':
+    dist_values = np.log10(D[:,0])
+  elif FLAGS.dist == 'cos':
+    dist_values = D[:,0]
 
   fig, ax1 = plt.subplots()
   accurated_pred_samples = np.abs(pred_values - true_values) <= 0.01 # good_pred.shape = (query_num)
@@ -73,8 +76,8 @@ def main(unused_argv):
   # draw rho difference
   ax2 = ax1.twinx()
   ax2.scatter(true_values, dist_values, c = 'g', s = 2, alpha = 0.7, label = 'extractor(rho) diff')
-  ax2.axhline(y=np.log10(threshold), color = 'k', linestyle = '-', alpha = 0.2, label = 'rho diff = %f' % threshold)
-  ax2.set_ylabel('log10(extractor(rho) diff)')
+  ax2.axhline(y=(np.log10(threshold) if FLAGS.dist == 'l2' else threshold), color = 'k', linestyle = '-', alpha = 0.2, label = 'rho diff = %f' % threshold)
+  ax2.set_ylabel('log10(extractor(rho) diff)' if FLAGS.dist == 'l2' else 'extractor(rho) cos distance')
   ax2.set_ylim(-5, 2)
   ax2.legend()
   fig.savefig(FLAGS.output)

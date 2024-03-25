@@ -29,7 +29,7 @@ def main(unused_argv):
     index = faiss.GpuIndexFlatL2(res, 256, flat_config)
   elif FLAGS.dist == 'cos':
     index = faiss.GpuIndexFlatIP(res, 256, flat_config)
-    faiss.normalize_L2(trainset)
+  faiss.normalize_L2(trainset)
   index.add(trainset)
   index_cpu = faiss.index_gpu_to_cpu(index)
   faiss.write_index(index_cpu, 'faiss.index')

@@ -10,6 +10,7 @@ FLAGS = flags.FLAGS
 
 def add_options():
   flags.DEFINE_enum('dist', default = 'l2', enum_values = {'l2', 'cos'}, help = 'distance type')
+  flags.DEFINE_string('input', default = 'results.npz', help = 'path to npz')
 
 def main(unused_argv):
   data = np.load('results.npz')

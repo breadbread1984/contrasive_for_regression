@@ -59,7 +59,10 @@ def main(unused_argv):
   with open('thresholds.txt', 'w') as f:
     f.write('tpr,fpr,threshold\n')
     for idx, threshold in enumerate(tqdm(thresholds)):
-      pred = x < threshold
+      if FLAGS.dist == 'l2':
+        pred = x < threshold
+      elif FLAGS.dist == 'cos':
+        pred = x > threshold
       TP = np.sum(np.logical_and(pred,y).astype(np.int32))
       TP_FN = np.sum(y.astype(np.int32)) # TP + FN
       tpr = TP / np.maximum(TP_FN, 1e-32)

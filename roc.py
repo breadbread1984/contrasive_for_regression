@@ -13,7 +13,7 @@ def add_options():
   flags.DEFINE_string('input', default = 'results.npz', help = 'path to npz')
 
 def main(unused_argv):
-  data = np.load('results.npz')
+  data = np.load(FLAGS.input)
   x, y = data['x'], data['y']
   values = np.unique(x)
   if FLAGS.dist == 'l2':

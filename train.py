@@ -16,7 +16,7 @@ from models import PredictorSmall
 FLAGS = flags.FLAGS
 
 def add_options():
-  flags.DEFINE_string('dataset', default = None, help = 'path to directory containing dataset')
+  flags.DEFINE_string('dataset', default = None, help = 'path to npy path')
   flags.DEFINE_string('ckpt', default = 'ckpt', help = 'path to directory for checkpoints')
   flags.DEFINE_integer('batch_size', default = 256, help = 'batch size')
   flags.DEFINE_integer('save_freq', default = 1000, help = 'checkpoint save frequency')

@@ -1,20 +1,46 @@
 #!/usr/bin/python3
 
+from os.path import exists, join
 from absl import flags, app
-import matplotlib.pyplot as plt
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 import numpy as np
+import faiss
 import pickle
 
 FLAGS = flags.FLAGS
 
 def add_options():
+  flags.DEFINE_string('trainset', default = None, help = 'path to trainset npy')
+  flags.DEFINE_string('evalset', default = None, help = 'path to evalset npy')
+  flags.DEFINE_string('trainlabel', default = None, help = 'path to train label npy')
+  flags.DEFINE_string('evallabel', default = None, help = 'path to eval label npy')
   flags.DEFINE_enum('dist', default = 'l2', enum_values = {'l2', 'cos'}, help = 'distance type')
-  flags.DEFINE_string('input', default = 'results.npz', help = 'path to npz')
 
 def main(unused_argv):
-  data = np.load(FLAGS.input)
-  x, y = data['x'], data['y']
+  # create index and search
+  print('create index and search')
+  trainset = np.ascontiguousarray(np.load(FLAGS.trainset)).astype(np.float32)
+  res = faiss.StandardGpuResources()
+  flat_config = faiss.GpuIndexFlatConfig()
+  flat_config.device = 0
+  if FLAGS.dist == 'l2':
+    index = faiss.GpuIndexFlatL2(res, 256, flat_config)
+  elif FLAGS.dist == 'cos':
+    index = faiss.GpuIndexFlatIP(res, 256, flat_config)
+  faiss.normalize_L2(trainset)
+  index.add(trainset)
+  evalset = np.ascontiguousarray(np.load(FLAGS.evalset)).astype(np.float32)
+  faiss.normalize_L2(evalset)
+  D, I = index.search(evalset, 1)
+  train_labels = np.load(FLAGS.trainlabel)
+  eval_labels = np.load(FLAGS.evallabel)
+  true_values = eval_labels
+  pred_values = np.squeeze(train_labels[I], axis = -1) # pred_values.shape = (query_num, 1)
+  x = D[:,0]
+  y = np.abs(pred_values - true_values) <= 0.01
+  # roc
+  print('plotting ROC')
   values = np.unique(x)
   if FLAGS.dist == 'l2':
     thresholds = np.concatenate([[np.max(values) + 1,], np.sort(values)[::-1], [0,]], axis = 0)
@@ -30,12 +56,10 @@ def main(unused_argv):
         pred = x < threshold
       elif FLAGS.dist == 'cos':
         pred = x > threshold
-      else:
-        raise Exception('unknown distance')
-      TP = np.sum(np.logical_and(pred, y).astype(np.int32))
+      TP = np.sum(np.logical_and(pred,y).astype(np.int32))
       TP_FN = np.sum(y.astype(np.int32)) # TP + FN
       tpr = TP / np.maximum(TP_FN, 1e-32)
-      FP = np.sum(np.logical_and(pred, np.logical_not(y)).astype(np.int32))
+      FP = np.sum(np.logical_and(pred,np.logical_not(y)).astype(np.int32))
       FP_TN = np.sum(np.logical_not(y).astype(np.int32)) # N = FP + TN
       fpr = FP / np.maximum(FP_TN, 1e-32)
       tprs.append(tpr)
@@ -43,7 +67,7 @@ def main(unused_argv):
       f.write('%f,%f,%f\n' % (tpr, fpr, threshold))
   ax1.plot(fprs, tprs)
   ax1.set_xlabel('false positive rate')
-  ax1.set_ylabel('true postive rate')
+  ax1.set_ylabel('true positive rate')
   fig.savefig('roc.png')
   with open('roc.pkl', 'wb') as f:
     f.write(pickle.dumps(fig))

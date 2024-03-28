@@ -38,8 +38,8 @@ def main(unused_argv):
   results = list()
   step_num = np.ceil(rho.shape[0] / FLAGS.batch).astype(np.int32)
   for i in tqdm(range(step_num)):
-    r = rho[i * FLAGS.batch:(i + 1) * FLAGS.batch, 3:] # r.shape = (batch, 1331)
-    inputs = np.reshape(r, (r.shape[0],1,11,11,11)).astype(np.float32)
+    r = rho[i * FLAGS.batch:(i + 1) * FLAGS.batch, :1361] # r.shape = (batch, 1331)
+    inputs = np.reshape(r, (r.shape[0],1,1361)).astype(np.float32)
     outputs = predictor.predict(inputs)
     results.append(outputs)
   results = np.concatenate(results, axis = 0) # results.shape = (data num, 1331)

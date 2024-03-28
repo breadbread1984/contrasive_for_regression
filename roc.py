@@ -33,8 +33,8 @@ def main(unused_argv):
   evalset = np.ascontiguousarray(np.load(FLAGS.evalset)).astype(np.float32)
   faiss.normalize_L2(evalset)
   D, I = index.search(evalset, 1)
-  train_labels = np.load(FLAGS.trainlabel)
-  eval_labels = np.load(FLAGS.evallabel)
+  train_labels = np.ascontiguousarray(np.load(FLAGS.trainlabel)[:,-1]).astype(np.float32)
+  eval_labels = np.ascontiguousarray(np.load(FLAGS.evallabel)[:,-1]).astype(np.float32)
   true_values = eval_labels
   pred_values = np.squeeze(train_labels[I], axis = -1) # pred_values.shape = (query_num, 1)
   x = D[:,0]
